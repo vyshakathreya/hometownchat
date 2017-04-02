@@ -108,6 +108,7 @@ public class SearchFragment extends Fragment implements AdapterView.OnItemSelect
         stateList = (Spinner) searchView.findViewById(R.id.spinner_search_state);
         stateList.setOnItemSelectedListener(this);
 
+        //years.clear();
         yearList = (Spinner) searchView.findViewById(R.id.spinner_search_year);
         yearList.setOnItemSelectedListener(this);
         if(!years.isEmpty() && years.get(0) != "Select year") {
@@ -142,6 +143,7 @@ public class SearchFragment extends Fragment implements AdapterView.OnItemSelect
         countries.clear();
         String url_countries ="http://bismarck.sdsu.edu/hometown/countries";
         Log.d("rew", "Start");
+        countries.add(0,"Select Country");
         Response.Listener<JSONArray> success = new Response.Listener<JSONArray>() {
             public void onResponse(JSONArray response) {
                 for(int i=0;i<response.length();i++){
@@ -201,8 +203,8 @@ public class SearchFragment extends Fragment implements AdapterView.OnItemSelect
     }
 
     private void getSearchResults() {
-        if(country != "Select Country" && state == "Select State" && year == "Select year"){ //search only for country
-            urlSearch = "SELECT nickname,state,country,year FROM friends WHERE country="+country;
+        if(!country.equals("Select Country") && state.equals("Select State") && year.equals("Select year")){ //search only for country
+            urlSearch = "SELECT nickname,state,country,year,latitude,longitude FROM friends WHERE country LIKE "+"\'"+country+"\'";
         }
         if(state != "Select State" && country != "Select Country" && year == "Select year"){ //search for state and country
             urlSearch = "SELECT nickname,state,country,year FROM friends WHERE country="+country+"AND state="+state;

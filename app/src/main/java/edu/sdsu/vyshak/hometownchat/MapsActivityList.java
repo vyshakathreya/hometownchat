@@ -23,7 +23,7 @@ public class MapsActivityList extends FragmentActivity implements OnMapReadyCall
     private String latitude;
     private String longitude;
     private String name;
-    private String country;
+    private String TAG="MapsActivityList";
     private String state;
     private boolean action;
     private double parseLat;
@@ -46,12 +46,12 @@ public class MapsActivityList extends FragmentActivity implements OnMapReadyCall
         longitude = getIntent().getStringExtra("long");
         latitude = getIntent().getStringExtra("lat");
         name = getIntent().getStringExtra("name");
-        state = getIntent().getStringExtra("state");
-        country = getIntent().getStringExtra("country");
+        //state = getIntent().getStringExtra("state");
+        //country = getIntent().getStringExtra("country");
         longitudes = getIntent().getStringArrayListExtra("longlist");
         latitudes = getIntent().getStringArrayListExtra("latlist");
-        countries = getIntent().getStringArrayListExtra("countrylist");
-        states = getIntent().getStringArrayListExtra("stateslist");
+        //countries = getIntent().getStringArrayListExtra("countrylist");
+        //states = getIntent().getStringArrayListExtra("stateslist");
         names = getIntent().getStringArrayListExtra("namelist");
         action = getIntent().getBooleanExtra("action",action);
     }
@@ -69,62 +69,21 @@ public class MapsActivityList extends FragmentActivity implements OnMapReadyCall
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        Log.d(TAG, "onMapReady: " + action);
         if (action) { //for single option selected
             parseLat = Double.parseDouble(latitude);
             parseLong = Double.parseDouble(longitude);
-
-            if(parseLat==0.0 || parseLong==0.0) {
-                Geocoder locator = new Geocoder(this);
-                Log.d("onMapReady","Geocoder"+state+","+country+parseLat);
-                try {
-                    List<Address> sanDiego =
-                            locator.getFromLocationName(state +","+ country,3);
-                    for (Address givenLocation: sanDiego) {
-                        if (givenLocation.hasLatitude())
-                            parseLat=givenLocation.getLatitude();
-                        if (givenLocation.hasLongitude())
-                            parseLong=givenLocation.getLongitude();
-                    }
-                } catch (java.io.IOException IOException){
-                    Toast.makeText(this, "Please try again for better results",
-                            Toast.LENGTH_LONG).show();
-                } catch (Exception error) {
-                    Log.e("rew", "Address lookup Error", error);
-                }
-            }
-        }
-
-        LatLng newpoint = new LatLng(parseLat,parseLong);
+        LatLng newpoint = new LatLng(parseLat, parseLong);
         Log.d("onMapReady", "single action" + newpoint);
         mMap.moveCamera(CameraUpdateFactory.newLatLng(newpoint));
         mMap.addMarker(new MarkerOptions().position(newpoint).title(name));
-
+    }
 
         if (!action) {
             for (int i = 0; i < names.size(); i++) {
-                parseLat=Double.parseDouble(latitudes.get(i));
-                parseLong=Double.parseDouble(longitudes.get(i));
-                if(parseLat==0.0 || parseLong==0.0) {
-                    Geocoder locator = new Geocoder(this);
-                    try {
-                        List<Address> sanDiego =
-                                locator.getFromLocationName(states.get(i) + "," + countries.get(i), 3);
-                        for (Address givenLocation : sanDiego) {
-                            if (givenLocation.hasLatitude())
-                                parseLat = givenLocation.getLatitude();
-                            if (givenLocation.hasLongitude())
-                                parseLong = givenLocation.getLongitude();
-                        }
-                    } catch (java.io.IOException IOException){
-                        Toast.makeText(this, "Please try again for better results",
-                                Toast.LENGTH_LONG).show();
-                    } catch (Exception error) {
-                        Log.e("rew", "Address lookup Error", error);
-                    }
-                }
-                if(names.get(i)!= null){
-                    mMap.addMarker(new MarkerOptions().position(new LatLng(parseLat,parseLong)).title(names.get(i)));
-                }
+                Log.d(TAG, "onMapReady: "+latitudes.get(i)+longitudes.get(i));
+                mMap.addMarker(new MarkerOptions().position(new LatLng(Double.parseDouble(latitudes.get(i)),
+                        Double.parseDouble(longitudes.get(i)))).title(names.get(i)));
             }
         }
     }

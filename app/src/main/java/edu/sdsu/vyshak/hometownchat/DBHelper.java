@@ -16,6 +16,13 @@ public class DBHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "name.db";
     private static final int DATABASE_VERSION = 1;
     private static final String FRIENDS_COLUMN_NAME = "nickname";
+    private static final String FRIENDS_COLUMN_COUNTRY="country";
+    private static final String FRIENDS_COLUMN_STATE="state";
+    private static final String FRIENDS_COLUMN_CITY="city";
+    private static final String FRIENDS_COLUMN_EMAIL="email";
+    private static final String FRIENDS_COLUMN_LATITUDE="latitude";
+    private static final String FRIENDS_COLUMN_LONGITUDE="longitude";
+    private static final String FRIENDS_COLUMN_YEAR="year";
 
     public DBHelper(Context context) {
         super(context,DATABASE_NAME, null, DATABASE_VERSION);
@@ -44,8 +51,8 @@ public class DBHelper extends SQLiteOpenHelper {
         return true;
     }
 
-    public ArrayList<String> getUsers(String query) {
-        ArrayList<String> array_list = new ArrayList<>();
+    public ArrayList<User> getUsers(String query) {
+        ArrayList<User> array_list = new ArrayList<>();
 
         //hp = new HashMap();
         SQLiteDatabase db = this.getReadableDatabase();
@@ -53,9 +60,17 @@ public class DBHelper extends SQLiteOpenHelper {
         res.moveToFirst();
 
         while(res.isAfterLast() == false){
-            array_list.add(res.getString(res.getColumnIndex(FRIENDS_COLUMN_NAME)));
+            User user = new User();
+            user.setNickname(res.getString(res.getColumnIndex(FRIENDS_COLUMN_NAME)));
+            user.setYear(res.getString(res.getColumnIndex(FRIENDS_COLUMN_YEAR)));
+            user.setState(res.getString(res.getColumnIndex(FRIENDS_COLUMN_STATE)));
+            user.setCountry(res.getString(res.getColumnIndex(FRIENDS_COLUMN_COUNTRY)));
+            user.setLatitude(res.getDouble(res.getColumnIndex(FRIENDS_COLUMN_LATITUDE)));
+            user.setLongitude(res.getDouble(res.getColumnIndex(FRIENDS_COLUMN_LONGITUDE)));
+            array_list.add(user);
             res.moveToNext();
         }
+        //res.close();
         return array_list;
     }
 

@@ -2,8 +2,6 @@ package edu.sdsu.vyshak.hometownchat;
 
 import android.content.Context;
 import android.content.Intent;
-import android.location.Address;
-import android.location.Geocoder;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -13,21 +11,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonArrayRequest;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -122,13 +110,9 @@ public class ResultListFragment extends ListFragment implements AdapterView.OnIt
                 intentlist.putExtra("long",longitude);
                 intentlist.putExtra("lat",latitude);
                 intentlist.putExtra("name",name);
-                intentlist.putExtra("state",state);
-                intentlist.putExtra("country",country);
                 intentlist.putStringArrayListExtra("longlist",longitudes);
                 intentlist.putStringArrayListExtra("latlist",latitudes);
                 intentlist.putStringArrayListExtra("namelist",names);
-                intentlist.putStringArrayListExtra("countrylist",countries);
-                intentlist.putStringArrayListExtra("stateslist",states);
                 intentlist.putExtra("action",action);
                 startActivity(intentlist);
             }
@@ -166,8 +150,13 @@ public class ResultListFragment extends ListFragment implements AdapterView.OnIt
 
     private void userlist() {
         Toast.makeText(getActivity(), "Loading...", Toast.LENGTH_SHORT).show();
-        users = mydb.getUsers(url);
-        Log.d(TAG, "userlist: "+users);
+        usersList = mydb.getUsers(url);
+        Log.d(TAG, "userlist: "+usersList);
+        for(User user:usersList){
+            longitudes.add(Double.toString(user.getLongitude()));
+            latitudes.add(Double.toString(user.getLatitude()));
+            names.add(user.getNickname());
+        }
         getListView().setAdapter(new CustomAdapter(usersList, getContext()));
     }
 
@@ -178,21 +167,18 @@ public class ResultListFragment extends ListFragment implements AdapterView.OnIt
         longitude = longitudes.get(position);
         latitude = latitudes.get(position);
         name = names.get(position);
-        country = countries.get(position);
+        /*country = countries.get(position);
         state = states.get(position);
-        /*Intent intent = new Intent(getActivity(), MapsActivityList.class);
+        */
+        Intent intent = new Intent(getActivity(), MapsActivityList.class);
         intent.putExtra("long",longitude);
         intent.putExtra("lat",latitude);
         intent.putExtra("name",name);
         intent.putExtra("action",action);
-        intent.putExtra("state",state);
-        intent.putExtra("country",country);
         intent.putStringArrayListExtra("longlist",longitudes);
         intent.putStringArrayListExtra("latlist",latitudes);
-        intent.putStringArrayListExtra("countrylist",countries);
-        intent.putStringArrayListExtra("stateslist",states);
         intent.putStringArrayListExtra("namelist",names);
-        startActivity(intent);*/
+        startActivity(intent);
     }
 
     @Override

@@ -32,6 +32,7 @@ import java.util.List;
 
 
 public class MainActivity extends AppCompatActivity {
+    private static final String TAG = "Main Activity";
     DBHelper mydb;
     private String url;
     private String urlCount;
@@ -79,7 +80,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        loadFormFragment();
         mydb = new DBHelper(this);
         new GetDatabaseTask().execute(mydb);
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
@@ -94,7 +95,8 @@ public class MainActivity extends AppCompatActivity {
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
                     public void onResponse(String response) {
-                        page=Integer.getInteger(response)/25;
+                       // page=Integer.getInteger(response)/25;
+                        Log.d(TAG,"getCount()"+response.toString());
                     }
                 }, new Response.ErrorListener() {
             public void onErrorResponse(VolleyError error) {
@@ -152,6 +154,7 @@ public class MainActivity extends AppCompatActivity {
                                 Log.e("rew", "Address lookup Error", error);
                             }
                         }
+                        //if(mydb.getUsers("Select nickname from friends"))
                         mydb.insertUser(nickname,null,city,state,country,latitude,longitude,year);
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -164,11 +167,11 @@ public class MainActivity extends AppCompatActivity {
                 Log.d("statefail", error.toString());
             }
         };
-        for(int i=0;i<page;i++) {
-            url = "http://bismarck.sdsu.edu/hometown/users?reverse=true&page="+i;
+        //for(int i=0;i<page;i++) {
+            url = "http://bismarck.sdsu.edu/hometown/users?reverse=true&page=1";
             JsonArrayRequest getRequestState = new JsonArrayRequest(url, success_state, failure);
             VolleyQueue.instance(this).add(getRequestState);
-        }
+        //}
     }
 
     public class GetDatabaseTask extends AsyncTask<SQLiteOpenHelper ,Void, Void> {

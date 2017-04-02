@@ -53,9 +53,9 @@ public class FormFragment extends Fragment implements AdapterView.OnItemSelected
     private String mParam1;
     private String mParam2;
     RequestQueue queue;
-    ArrayList<String> countries = new ArrayList<String>();
-    ArrayList<String> states = new ArrayList<String>();
-    ArrayList<String> years = new ArrayList<String>();
+    ArrayList<String> countries = new ArrayList<>();
+    ArrayList<String> states = new ArrayList<>();
+    ArrayList<String> years = new ArrayList<>();
 
 
     private OnFragmentInteractionListener mListener;
