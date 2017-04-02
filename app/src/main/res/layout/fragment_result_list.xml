@@ -1,0 +1,24 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="edu.sdsu.vyshak.hometownchat.ResultListFragment">
+
+    <ListView
+        android:paddingTop="10dp"
+        android:id="@android:id/list"
+        android:layout_width="wrap_content"
+        android:layout_height="430dp"
+        tools:ignore="NestedScrolling" />
+
+    <Button
+        android:id="@+id/mark"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginTop="10dp"
+        android:text="@string/find_all_on_map"
+        android:textAlignment="center" />
+
+
+</FrameLayout>

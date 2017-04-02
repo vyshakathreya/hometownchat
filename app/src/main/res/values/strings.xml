@@ -1,0 +1,30 @@
+<resources>
+    <string name="app_name">Hometown Chat</string>
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_notifications">Notifications</string>
+    <string name="myprofile">My profile</string>
+    <string name="findfriends">Find friends</string>
+
+    <string name="NickName">Nick name</string>
+    <string name="password">Password</string>
+    <string name="minthreecharacter">password</string>
+    <string name="country">Country</string>
+    <string name="state">State</string>
+    <string name="city">City</string>
+    <string name="year">Year</string>
+    <string name="save">Save</string>
+    <string name="finding_fello_sdsu_mates">finding fello SDSU mates</string>
+    <string name="latitude">Latitude</string>
+    <string name="locate_on_the_map">Locate on the map</string>
+    <string name="longitude">Longitude</string>
+    <string name="find_friends_by_country_state_city_or_year_at_sdsu">Find friends by Country, State, City or year at SDSU</string>
+    <string name="find">Find</string>
+    <string name="title_activity_maps">Map</string>
+    <string name="title_activity_maps_list">Map</string>
+    <string name="find_all_on_map">Find all on map</string>
+    <string name="name_year_state_country">Name | Year | State, Country</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+</resources>
