@@ -12,4 +12,9 @@
         android:icon="@drawable/ic_group_black_24px"
         android:title="@string/findfriends" />
 
+    <item
+        android:id="@+id/logout"
+        android:icon="@drawable/ic_power_settings_new_black_24px"
+        android:title="@string/logout" />
+
 </menu>

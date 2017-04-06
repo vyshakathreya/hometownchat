@@ -131,7 +131,7 @@ public class SearchFragment extends Fragment implements AdapterView.OnItemSelect
                 nextFrag.setArguments(bundle);
                 FragmentManager fragments = getFragmentManager();
                 FragmentTransaction fragmentTransaction = fragments.beginTransaction();
-                fragmentTransaction.replace(R.id.content, nextFrag)
+                fragmentTransaction.replace(R.id.content2, nextFrag)
                         .addToBackStack(null)
                         .commit();
             }
@@ -207,7 +207,7 @@ public class SearchFragment extends Fragment implements AdapterView.OnItemSelect
             urlSearch = "SELECT nickname,state,country,year,latitude,longitude FROM friends WHERE country LIKE "+"\'"+country+"\'";
         }
         if(state != "Select State" && country != "Select Country" && year == "Select year"){ //search for state and country
-            urlSearch = "SELECT nickname,state,country,year FROM friends WHERE country="+country+"AND state="+state;
+            urlSearch = "SELECT nickname,state,country,year FROM friends WHERE country LIKE "+"\'"+country+"\'"+"AND state LIKE"+"\'"+state+"\'";
         }
         if( state == "Select State" && year != "Select year" && country != "Select Country") { //search for year and country
             urlSearch = "SELECT nickname,state,country,year FROM friends WHERE year=" + year + "AND country=" + country;

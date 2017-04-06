@@ -37,7 +37,7 @@ public class ResultListFragment extends ListFragment implements AdapterView.OnIt
     private String mParam2;
     private String TAG="ResultListFragment";
     private OnFragmentInteractionListener mListener;
-    private String url;
+    private String url="SELECT nickname,state,country,year,latitude,longitude FROM friends";
     private static final int REQ_FORM=123;
     private String longitude;
     private String latitude;

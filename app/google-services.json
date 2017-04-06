@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "809746171895",
+    "firebase_url": "https://hometownchat-5de8a.firebaseio.com",
+    "project_id": "hometownchat-5de8a",
+    "storage_bucket": "hometownchat-5de8a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:809746171895:android:da66a94597ec05b2",
+        "android_client_info": {
+          "package_name": "edu.sdsu.vyshak.hometownchat"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "809746171895-5huhgbuhkmdo531jbtsscodvbt404p92.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "edu.sdsu.vyshak.hometownchat",
+            "certificate_hash": "789706880cb438714822d04597dca35de67ca585"
+          }
+        },
+        {
+          "client_id": "809746171895-skc2rb8o09bm8jl0psa5leusogj44qk1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAPgxG6xvP5Cnp2GPWQgIQsf2y1L4jli34"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "809746171895-skc2rb8o09bm8jl0psa5leusogj44qk1.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

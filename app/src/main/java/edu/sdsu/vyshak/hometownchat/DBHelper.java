@@ -23,6 +23,7 @@ public class DBHelper extends SQLiteOpenHelper {
     private static final String FRIENDS_COLUMN_LATITUDE="latitude";
     private static final String FRIENDS_COLUMN_LONGITUDE="longitude";
     private static final String FRIENDS_COLUMN_YEAR="year";
+    private static final String TABLE_NAME="friends";
 
     public DBHelper(Context context) {
         super(context,DATABASE_NAME, null, DATABASE_VERSION);
@@ -72,6 +73,15 @@ public class DBHelper extends SQLiteOpenHelper {
         }
         //res.close();
         return array_list;
+    }
+
+    public int getUserCount() {
+        String countQuery = "SELECT  * FROM " + TABLE_NAME;
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(countQuery, null);
+        int cnt = cursor.getCount();
+        cursor.close();
+        return cnt;
     }
 
     @Override
