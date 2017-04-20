@@ -1,0 +1,56 @@
+<!--
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent" android:layout_height="match_parent">
+
+
+    <TextView
+        android:id="@+id/sender"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/message_text_sent"
+        android:layout_alignParentEnd="true"
+        android:layout_marginBottom="16dp"
+        android:text="@string/sender"
+        android:textColor="@color/authui_colorAccent"
+        android:textStyle="normal|bold" />
+
+    <TextView
+        android:id="@+id/message_text_sent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="17dp"
+        android:foregroundGravity="right"
+        android:gravity="right"
+        android:text="@string/message_sender"
+        android:textSize="18sp"/>
+</RelativeLayout>-->
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
+        android:id="@+id/sender"
+        android:text="@string/sender"
+        android:textSize="@dimen/com_facebook_likeboxcountview_text_size"
+        android:textStyle="normal|bold"
+        android:textColor="@color/authui_colorPrimaryDark"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/sender"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="5dp"
+        android:id="@+id/message_text_sent"
+        android:text="@string/message_sender"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+        android:textSize="18sp"
+        android:textColor="@color/colorAccent"/>
+</RelativeLayout>

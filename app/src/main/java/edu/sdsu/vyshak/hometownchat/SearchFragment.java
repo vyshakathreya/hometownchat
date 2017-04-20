@@ -1,6 +1,7 @@
 package edu.sdsu.vyshak.hometownchat;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -10,14 +11,21 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -36,8 +44,6 @@ import java.util.Calendar;
  * create an instance of this fragment.
  */
 public class SearchFragment extends Fragment implements AdapterView.OnItemSelectedListener {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
     private Spinner countryList;
@@ -46,20 +52,30 @@ public class SearchFragment extends Fragment implements AdapterView.OnItemSelect
     private String country="Select Country";
     private String state="Select State";
     private String year="Select Year";
+    private String category;
     private String  urlSearch = "http://bismarck.sdsu.edu/hometown/users?reverse=true";
+    private String querySearch="SELECT nickname,state,country,year,latitude,longitude FROM users";
+    private String querySearchMap="SELECT nickname,state,country,year,latitude,longitude FROM users";
+    private String categoryMap;
     private int startYear=1970;
+    private FirebaseAuth mAuth;
+    private TextView loggedUser;
+    ValueEventListener postListener;
+
     ArrayList<String> countries = new ArrayList<String>();
     ArrayList<String> states = new ArrayList<String>();
     ArrayList<String> years = new ArrayList<String>();
 
 
-    // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
 
     private OnFragmentInteractionListener mListener;
     OnHeadlineSelectedListener mCallback;
     Calendar cal = Calendar.getInstance();
+    ResultListFragment nextFrag= new ResultListFragment();
+
+
     public SearchFragment() {
         // Required empty public constructor
     }
@@ -94,9 +110,13 @@ public class SearchFragment extends Fragment implements AdapterView.OnItemSelect
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
+        mAuth = FirebaseAuth.getInstance();
+        final FirebaseUser user = mAuth.getCurrentUser();
         View searchView = inflater.inflate(R.layout.fragment_search, container, false);
-
+        this.getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+        loggedUser = (TextView) searchView.findViewById(R.id.loggedUser);
+        Log.d("Search Fragment","loggedUsed"+loggedUser);
+        loggedUser.setText(" ");
         getCountries();
         for(int i=startYear; i <= cal.get(Calendar.YEAR); i++){
             years.add(String.valueOf(i));
@@ -108,7 +128,6 @@ public class SearchFragment extends Fragment implements AdapterView.OnItemSelect
         stateList = (Spinner) searchView.findViewById(R.id.spinner_search_state);
         stateList.setOnItemSelectedListener(this);
 
-        //years.clear();
         yearList = (Spinner) searchView.findViewById(R.id.spinner_search_year);
         yearList.setOnItemSelectedListener(this);
         if(!years.isEmpty() && years.get(0) != "Select year") {
@@ -119,21 +138,50 @@ public class SearchFragment extends Fragment implements AdapterView.OnItemSelect
         yearAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         yearList.setAdapter(yearAdapter);
 
-        final Button submit = (Button) searchView.findViewById(R.id.search);
+        final Button submit = (Button) searchView.findViewById(R.id.searchlist);
         submit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View button) {
                 getSearchResults();
                 Bundle bundle = new Bundle();
-                bundle.putString("url",urlSearch);
-                Log.d("Search Fragment","search result"+urlSearch);
+                bundle.putString("url",querySearch);
+                bundle.putString("cat",category);
+                Log.d("Search Fragment","search result"+querySearch);
                 ResultListFragment nextFrag= new ResultListFragment();
                 nextFrag.setArguments(bundle);
                 FragmentManager fragments = getFragmentManager();
                 FragmentTransaction fragmentTransaction = fragments.beginTransaction();
-                fragmentTransaction.replace(R.id.content2, nextFrag)
-                        .addToBackStack(null)
-                        .commit();
+                fragmentTransaction.replace(R.id.content2, nextFrag).commit();
+            }
+        });
+
+        final Button clear = (Button) searchView.findViewById(R.id.clear);
+        clear.setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View button) {
+                        years.clear();
+                        years.add(0, "Select year");
+                        for(int i=startYear; i <= cal.get(Calendar.YEAR); i++){
+                            years.add(String.valueOf(i));
+                        }
+                        countries.clear();
+                        states.clear();
+                        states.add(0, "Select State");
+                        getCountries();
+                    }
+                });
+
+        final Button locate = (Button) searchView.findViewById(R.id.searchmap);
+        locate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View button) {
+                Intent intentlist = new Intent(getActivity(), MapsActivityList.class);
+                querySearchMap=querySearch;
+                getSearchResults();
+                intentlist.putExtra("query",querySearchMap);
+                intentlist.putExtra("cat",categoryMap);
+                startActivity(intentlist);
             }
         });
         return searchView;
@@ -204,31 +252,37 @@ public class SearchFragment extends Fragment implements AdapterView.OnItemSelect
 
     private void getSearchResults() {
         if(!country.equals("Select Country") && state.equals("Select State") && year.equals("Select year")){ //search only for country
-            urlSearch = "SELECT nickname,state,country,year,latitude,longitude FROM friends WHERE country LIKE "+"\'"+country+"\'";
+            querySearch = "SELECT nickname,state,country,year,latitude,longitude FROM users WHERE country LIKE "+"\'"+country+"\'" ;
+            category = "country";
         }
         if(state != "Select State" && country != "Select Country" && year == "Select year"){ //search for state and country
-            urlSearch = "SELECT nickname,state,country,year FROM friends WHERE country LIKE "+"\'"+country+"\'"+"AND state LIKE"+"\'"+state+"\'";
+            querySearch = "SELECT nickname,state,country,year,latitude,longitude FROM users WHERE country LIKE "+"\'"+country+"\'"+" AND state LIKE "+"\'"+state+"\'";
+            category = "countryState";
         }
         if( state == "Select State" && year != "Select year" && country != "Select Country") { //search for year and country
-            urlSearch = "SELECT nickname,state,country,year FROM friends WHERE year=" + year + "AND country=" + country;
+            querySearch = "SELECT nickname,state,country,year,latitude,longitude FROM users WHERE year=" + year + " AND country LIKE "+"\'"+country+"\'";
+            category = "countryYear";
         }
         if(  country == "Select Country" && year != "Select year" ){ //search only for year
-            urlSearch = "SELECT nickname,state,country,year FROM friends WHERE year="+year;
+            querySearch = "SELECT nickname,state,country,year,latitude,longitude FROM users WHERE year="+year;
+            category = "year";
         }
         if(country != "Select Country" && state != "Select State" && year != "Select year"){ //search for particular year , state and country
-            urlSearch = "SELECT nickname,state,country,year FROM friends WHERE country="+country+"AND state="+state+"AND year="+year;
+            querySearch = "SELECT nickname,state,country,year,latitude,longitude FROM users WHERE country LIKE "+"\'"+country+"\'"+" AND state LIKE "+"\'"+state+"\'"+" AND year= "+year;
+            category = "countryStateYear";
         }
         if(state == "Select State" &&  year == "Select year" && country == "Select Country"){ //no filter. select all.
-            urlSearch = "SELECT nickname,state,country,year FROM friends";
+            querySearch = "SELECT nickname,state,country,year,latitude,longitude FROM users";
+            category = "all";
         }
+        querySearchMap=querySearch;
+        categoryMap = category;
     }
 
     public void onArticleSelected(String urlSearch) {
         this.urlSearch = urlSearch;
     }
 
-
-    // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
         if (mListener != null) {
             mListener.onFragmentInteraction(uri);
@@ -265,7 +319,6 @@ public class SearchFragment extends Fragment implements AdapterView.OnItemSelect
             year = (String) parent.getItemAtPosition(position);
         }
     }
-
 
     @Override
     public void onNothingSelected(AdapterView<?> parent) {

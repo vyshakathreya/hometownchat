@@ -1,66 +1,48 @@
 <resources>
     <string name="app_name">Hometown Chat</string>
-    <string name="title_home">Home</string>
-    <string name="title_dashboard">Dashboard</string>
-    <string name="title_notifications">Notifications</string>
-    <string name="myprofile">My profile</string>
     <string name="findfriends">Find friends</string>
 
     <string name="NickName">Nick name</string>
     <string name="password">Password</string>
-    <string name="minthreecharacter">password</string>
     <string name="country">Country</string>
     <string name="state">State</string>
     <string name="city">City</string>
     <string name="year">Year</string>
     <string name="save">Save</string>
-    <string name="finding_fello_sdsu_mates">finding fello SDSU mates</string>
     <string name="latitude">Latitude</string>
     <string name="locate_on_the_map">Locate on the map</string>
     <string name="longitude">Longitude</string>
-    <string name="find_friends_by_country_state_city_or_year_at_sdsu">Find friends by Country, State, City or year at SDSU</string>
-    <string name="find">Find</string>
+    <string name="find_friends_by_country_state_city_or_year_at_sdsu">Find friends by country, state or year at SDSU</string>
     <string name="title_activity_maps">Map</string>
     <string name="title_activity_maps_list">Map</string>
-    <string name="find_all_on_map">Find all on map</string>
-    <string name="name_year_state_country">Name | Year | State, Country</string>
+
 
     <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="title_activity_login">Sign in</string>
 
     <!-- Strings related to login -->
-    <string name="prompt_email">Email</string>
-    <string name="prompt_password">Password (optional)</string>
-    <string name="action_sign_in">Sign in or register</string>
-    <string name="action_sign_in_short">Sign in</string>
-    <string name="error_invalid_email">This email address is invalid</string>
-    <string name="error_invalid_password">This password is too short</string>
-    <string name="error_incorrect_password">This password is incorrect</string>
-    <string name="error_field_required">This field is required</string>
-    <string name="permission_rationale">"Contacts permissions are needed for providing email
-        completions."
-    </string>
 
-    <string name="firebase_status_fmt">Firebase User: %s</string>
-
-    <string name="emailpassword_title_text">Email and Password</string>
-    <string name="emailpassword_status_fmt">Email User: %1$s (verified: %2$b)</string>
-
-    <string name="hint_user_id">User ID</string>
-    <string name="get_custom_token">Get Token</string>
+    <string name="emailpassword_title_text">Hometown Chat</string>
+    <string name="logged_user">Hi, %1$s</string>
     <string name="sign_in">Sign In</string>
     <string name="create_account">Create Account</string>
-    <string name="sign_out">Sign Out</string>
-    <string name="verify_email">Verify Email</string>
-    <string name="disconnect">Disconnect</string>
-    <string name="loading">Loading…</string>
-    <string name="custom_token">Custom Token</string>
     <string name="signed_out">Plese Sign in</string>
-    <string name="token_null">Token: null</string>
     <string name="hint_email">Email</string>
     <string name="hint_password">Password</string>
-    <string name="desc_firebase_lockup">Firebase logo and name</string>
     <string name="auth_failed">Authentication failed</string>
+    <string name="account_fail">Account not created</string>
     <string name="logout">Log Out</string>
+    <string name="auth_success">Account Created</string>
+    <string name="clear">Reset</string>
+    <string name="findlist">List View</string>
+    <string name="findmap">Maps View</string>
+    <string name="load_more">Refresh</string>
+    <string name="OK">Ok</string>
+    <string name="cancel">Cancel</string>
+    <string name="input">Input</string>
+    <string name="title_activity_chat">ChatActivity</string>
+    <string name="message_sender">message_sender</string>
+    <string name="sender">sender</string>
+    <string name="users_available_for_chat">Users Available For Chat</string>
+    <string name="name">Name</string>
 </resources>

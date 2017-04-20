@@ -1,5 +1,6 @@
 package edu.sdsu.vyshak.hometownchat;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 
 import com.android.volley.Request;
@@ -11,8 +12,10 @@ import com.android.volley.toolbox.Volley;
  */
 
 public class VolleyQueue {
+    @SuppressLint("StaticFieldLeak")
     private static VolleyQueue mInstance;
     private RequestQueue mRequestQueue;
+    @SuppressLint("StaticFieldLeak")
     private static Context mContext;
 
     private VolleyQueue(Context context) {

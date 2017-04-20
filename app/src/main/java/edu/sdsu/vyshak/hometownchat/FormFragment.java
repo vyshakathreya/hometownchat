@@ -6,11 +6,13 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -23,6 +25,17 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.UserProfileChangeRequest;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ValueEventListener;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -52,7 +65,6 @@ public class FormFragment extends Fragment implements AdapterView.OnItemSelected
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
-    RequestQueue queue;
     ArrayList<String> countries = new ArrayList<>();
     ArrayList<String> states = new ArrayList<>();
     ArrayList<String> years = new ArrayList<>();
@@ -60,13 +72,12 @@ public class FormFragment extends Fragment implements AdapterView.OnItemSelected
 
     private OnFragmentInteractionListener mListener;
     private String nickName;
+    private String email;
     private String country;
     private String state;
     private String city;
     private String passwordChosen;
     private String TAG="Form Fragment";
-    private String latitudetext;
-    private String longitudetext;
     private int startYear=1970;
     private int year;
     private Double latitude;
@@ -75,11 +86,19 @@ public class FormFragment extends Fragment implements AdapterView.OnItemSelected
     private Spinner spinnerState;
     private Spinner spinnerYear;
     private EditText nickNameField;
+    private EditText emailField;
     private EditText passwordField;
     private EditText cityEdit;
     private EditText latitudeEdit;
     private EditText longitudeEdit;
+    private FirebaseAuth auth;
+    private FirebaseAuth.AuthStateListener authListener;
     private static final int REQ_FORM=123;
+    private FirebaseUser user;
+    FirebaseDatabase database;
+    DatabaseReference dbRef;
+
+
 
     public FormFragment() {
         // Required empty public constructor
@@ -110,6 +129,25 @@ public class FormFragment extends Fragment implements AdapterView.OnItemSelected
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+
+        auth = FirebaseAuth.getInstance();
+        authListener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                user = firebaseAuth.getCurrentUser();
+                if (user != null) {
+                    Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
+                } else {
+                    Log.d(TAG, "onAuthStateChanged:signed_out");
+                }
+            }
+        };
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        auth.addAuthStateListener(authListener);
     }
 
     @Override
@@ -117,6 +155,7 @@ public class FormFragment extends Fragment implements AdapterView.OnItemSelected
                              Bundle savedInstanceState) {
         View formView = inflater.inflate(R.layout.fragment_form, container, false);
         getCountries();
+        this.getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         Calendar cal = Calendar.getInstance();
         for(int i=startYear; i <= cal.get(Calendar.YEAR); i++){
             years.add(String.valueOf(i));
@@ -132,6 +171,7 @@ public class FormFragment extends Fragment implements AdapterView.OnItemSelected
         yearAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerYear.setAdapter(yearAdapter);
         nickNameField = (EditText) formView.findViewById(R.id.textnickname);
+        emailField = (EditText) formView.findViewById(R.id.email);
         passwordField = (EditText) formView.findViewById(R.id.password);
         cityEdit = (EditText) formView.findViewById(R.id.city);
         latitudeEdit = (EditText) formView.findViewById(R.id.lat);
@@ -146,33 +186,44 @@ public class FormFragment extends Fragment implements AdapterView.OnItemSelected
             }
         });
 
-
-
         final Button submit = (Button) formView.findViewById(R.id.submit);
         submit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View button) {
                 nickName = nickNameField.getText().toString();
+                email=emailField.getText().toString();
                 passwordChosen = passwordField.getText().toString();
                 city= cityEdit.getText().toString();
-                latitudetext = latitudeEdit.getText().toString();
-                longitudetext = longitudeEdit.getText().toString();
-                if(nicknameTest()) nickNameField.setError("Please Choose another name");
+                latitude =Double.parseDouble(latitudeEdit.getText().toString()) ;
+                longitude = Double.parseDouble(longitudeEdit.getText().toString());
                 if(nickNameField == null) passwordField.setError("Please choose a nickname");
+                if(nicknameTest()) nickNameField.setError("Please Choose another name");
+                if(emailField == null) emailField.setError("Please enter valid email id");
                 if(passwordField == null) passwordField.setError("Please choose a password");
                 if(passwordField.length() < 3) passwordField.setError("Password should be a minimum of 3 characters");
                 if(city == null) cityEdit.setError("Please enter your city");
                 if(latitude == null) latitudeEdit.setError("Please enter latitude or find them through maps");
                 if(longitude == null) longitudeEdit.setError("Please enter longitude or find them through maps");
-                if(city!=null && latitude != null && longitude != null && country != null && state != null &&
-                        !nicknameTest() && passwordChosen!=null && nickName!=null) {
+                if(city!=null && latitudeEdit != null && !longitudeEdit.equals(null)  && country != null && state != null &&
+                        !nicknameTest() && passwordChosen!=null && nickName!=null && email!=null) {
                     postData();
                 }
                 else Toast.makeText(getActivity(), "Please correct errors and try again",
                         Toast.LENGTH_LONG).show();
             }
         });
+
+
         return formView;
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        super.onStop();
+        if (authListener != null) {
+            auth.removeAuthStateListener(authListener);
+        }
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -318,18 +369,17 @@ public class FormFragment extends Fragment implements AdapterView.OnItemSelected
 
     }
 
-    public void postData(){
-
+    public void postData() {
         JSONObject data = new JSONObject();
         try {
-            data.put("nickname",nickName);
-            data.put("password",passwordChosen);
-            data.put("city",city);
+            data.put("nickname", nickName);
+            data.put("password", passwordChosen);
+            data.put("city", city);
             data.put("longitude", getLongitude());
-            data.put("state",state);
-            data.put("year",year);
+            data.put("state", state);
+            data.put("year", year);
             data.put("latitude", getLatitude());
-            data.put("country",country);
+            data.put("country", country);
         } catch (JSONException error) {
             Log.e("rew", "JSON error", error);
             return;
@@ -338,28 +388,59 @@ public class FormFragment extends Fragment implements AdapterView.OnItemSelected
         Response.Listener<JSONObject> success = new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
-                //Process response here
-                if ( response.has("message")  ) {
-                    // handle error here
-                    Toast.makeText(getActivity(), "Data saved successfully!",
+                if (response.has("message")) {
+                    Log.i("rewPost", response.toString());
+                    auth.createUserWithEmailAndPassword(email, passwordChosen)
+                            .addOnCompleteListener(getActivity(), new OnCompleteListener<AuthResult>() {
+                                @Override
+                                public void onComplete(@NonNull Task<AuthResult> task) {
+                                    Log.d(TAG, "createUserWithEmail:onComplete:" + task.isSuccessful());
+                                    if (!task.isSuccessful())
+                                        Toast.makeText(getActivity(), R.string.account_fail,
+                                                Toast.LENGTH_SHORT).show();
+                                    else
+                                        dbRef = database.getInstance().getReference();
+                                    dbRef.child("users/"+nickName).child("email").setValue(email);
+                                    dbRef.child("users/"+nickName).child("nickname").setValue(nickName);
+                                    dbRef.child("users/"+nickName).child("uid").setValue(user.getUid()).addOnCompleteListener(new OnCompleteListener<Void>() {
+
+                                        @Override
+                                        public void onComplete(@NonNull Task<Void> task) {
+                                            if(task.isSuccessful()){
+                                                UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                                                        .setDisplayName(nickName)
+                                                        .build();
+                                                user = auth.getCurrentUser();
+                                                user.updateProfile(profileUpdates)
+                                                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                            @Override
+                                                            public void onComplete(@NonNull Task<Void> task) {
+                                                                if (task.isSuccessful()) {
+                                                                    Log.d(TAG, "User profile updated.");
+                                                                }
+                                                            }
+                                                        });
+                                            }
+
+                                        }
+                                    });
+                                }
+                            });
+                    }
+            }};
+
+            Response.ErrorListener failure = new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    Log.i("rew", "post fail " + new String(error.networkResponse.data));
+                    Toast.makeText(getActivity(), "Please correct the errors",
                             Toast.LENGTH_LONG).show();
                 }
-                Log.i("rewPost", response.toString());
-            }
-        };
-
-        Response.ErrorListener failure = new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.i("rew", "post fail " + new String(error.networkResponse.data));
-                Toast.makeText(getActivity(), "Please correct the errors",
-                        Toast.LENGTH_LONG).show();
-            }
-        };
-        String urlPost="http://bismarck.sdsu.edu/hometown/adduser";
-        JsonObjectRequest postRequest = new JsonObjectRequest(urlPost, data, success, failure);
-        VolleyQueue.instance(this.getContext()).add(postRequest);
-    }
+            };
+            String urlPost = "http://bismarck.sdsu.edu/hometown/adduser";
+            JsonObjectRequest postRequest = new JsonObjectRequest(urlPost, data, success, failure);
+                        VolleyQueue.instance(getContext()).add(postRequest);
+        }
 
     public boolean nicknameTest(){
         final boolean[] result = new boolean[1];
@@ -382,9 +463,9 @@ public class FormFragment extends Fragment implements AdapterView.OnItemSelected
     }
 
     public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
     }
+
 
 
     public boolean haveNetworkAccess() {

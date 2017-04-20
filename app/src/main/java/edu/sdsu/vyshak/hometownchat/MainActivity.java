@@ -35,28 +35,27 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "Main Activity";
     DBHelper mydb;
     private String url;
-    private String urlCount;
     private double latitude;
     private double longitude;
     private String nickname;
-    private String email;
     private String city;
     private String state;
     private String country;
-    private int page;
+    private int page=0;
     private int year;
     private int dbcount;
+
+
+
     private int servercount;
-    private FirebaseAuth mAuth;
+    private int userId;
+    private FirebaseAuth auth;
     private static final int RC_SIGN_IN = 123;
 
     ArrayList<String> users = new ArrayList<String>();
     Geocoder locator;
-    FormFragment fragmentForm = new FormFragment();
     SearchFragment fragmentSearch = new SearchFragment();
     ResultListFragment fragmentResult = new ResultListFragment();
-    LoginActivity loginActivity = new LoginActivity();
-    FirebaseAuth auth = FirebaseAuth.getInstance();
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -64,19 +63,12 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             switch (item.getItemId()) {
-                case R.id.myprofile:
-                    loadFormFragment();
-                    return true;
                 case R.id.findfriends:
-                    if(servercount>dbcount)
-                        userlist();
-                    loadSearchFragment();
+                    userlist(page);
                     loadResultFragment();
                     return true;
                 case R.id.logout:
                     logout();
-
-
                     return true;
             }
             return false;
@@ -84,63 +76,48 @@ public class MainActivity extends AppCompatActivity {
 
     };
 
-    private void logout() {
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mydb = new DBHelper(this);
+        new GetDatabaseTask().execute(mydb,null,null);
+        locator = new Geocoder(this);
+        dbcount=mydb.getMaxid();
+        Log.d(TAG,"dbcount"+dbcount);
         Intent loginIntent = new Intent(this, LoginActivity.class);
-        startActivity(loginIntent);
+        loginIntent.putExtra("check","login");
+        startActivityForResult(loginIntent,RC_SIGN_IN);
+    }
+
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == RC_SIGN_IN) {
+            if (resultCode == RESULT_OK) {
+                auth = FirebaseAuth.getInstance();
+                setContentView(R.layout.activity_main);
+                BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
+                navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+                loadSearchFragment();
+                getCount();
+                userlist(0);
+            }
+        }
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         FirebaseAuth.getInstance().signOut();
-
-    }
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        Intent loginIntent = new Intent(this, LoginActivity.class);
-        startActivity(loginIntent);
-        setContentView(R.layout.activity_main);
-        getCount();
-        Log.d(TAG,"user"+FirebaseAuth.getInstance().toString());
-        mydb = new DBHelper(this);
-        new GetDatabaseTask().execute(mydb);
-        BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
-        navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
-        locator = new Geocoder(this);
-        dbcount=mydb.getUserCount();
-        Log.d(TAG,"dbcount"+dbcount);
-        if(servercount>dbcount)
-        userlist();
-        loadSearchFragment();
-        loadResultFragment();
     }
 
     private void getCount() {
-        /*String urlCheckName="http://bismarck.sdsu.edu/hometown/count";
-
-        Response.Listener<JSONArray> success = new Response.Listener<JSONArray>() {
-            public void onResponse(JSONArray response) {
-                servercount=Integer.getInteger(response.toString());
-                Log.d(TAG,"getCount()"+response.toString());
-            }
-        };
-        Response.ErrorListener failure = new Response.ErrorListener() {
-            public void onErrorResponse(VolleyError error) {
-                Log.d("rew", error.toString());
-            }
-        };
-        JsonObjectRequest getRequest = new JsonObjectRequest(urlCheckName, success, failure);
-        VolleyQueue.instance(this).add(getRequest);*/
-
-        String url ="http://bismarck.sdsu.edu/hometown/count";
+        final int gCount=0;
+        String url =" http://bismarck.sdsu.edu/hometown/nextid";
+        Log.d(TAG,"resultatMain");//better value than http://bismarck.sdsu.edu/hometown/count
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
                     public void onResponse(String response) {
-                       // page=Integer.getInteger(response)/25;
-                        servercount=Integer.parseInt(response);
-                        Log.d(TAG,"getCount"+servercount);
+                        setServercount(Integer.parseInt(response));
+
                     }
                 }, new Response.ErrorListener() {
             public void onErrorResponse(VolleyError error) {
@@ -148,36 +125,34 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         VolleyQueue.instance(this).add(stringRequest);
+
+
+    }
+
+    private void logout() {
+        auth.getInstance().signOut();
+        Intent loginIntent = new Intent(this, LoginActivity.class);
+        loginIntent.putExtra("check","logout");
+        startActivity(loginIntent);
+
     }
 
     private void loadSearchFragment() {
         FragmentManager fragments = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragments.beginTransaction();
-        fragmentTransaction.replace(R.id.content, fragmentSearch);
-        fragmentTransaction.remove(fragmentForm);
-        fragmentTransaction.commit();
-    }
-
-    private void loadFormFragment() {
-        FragmentManager fragments = getSupportFragmentManager();
-        FragmentTransaction fragmentTransaction = fragments.beginTransaction();
-        fragmentTransaction.replace(R.id.content1, fragmentForm);
-        fragmentTransaction.remove(fragmentSearch);
-        fragmentTransaction.remove(fragmentResult);
-        fragmentTransaction.commit();
+        fragmentTransaction.add(R.id.content1, fragmentSearch);
+        fragmentTransaction.commitAllowingStateLoss();
     }
 
     private void loadResultFragment() {
         FragmentManager fragments = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragments.beginTransaction();
-        fragmentTransaction.replace(R.id.content2, fragmentResult);
-        fragmentTransaction.remove(fragmentForm);
+        fragmentTransaction.add(R.id.content2, fragmentResult);
         fragmentTransaction.commit();
     }
 
-    private void userlist() {
+    public void userlist(int page) {
         Toast.makeText(this,"Loading...", Toast.LENGTH_SHORT).show();
-
         Response.Listener<JSONArray> success_state = new Response.Listener<JSONArray>() {
             public void onResponse(JSONArray response) {
                 Log.d("rewstate", response.toString());
@@ -186,6 +161,8 @@ public class MainActivity extends AppCompatActivity {
                     try {
                         Log.d("getUsers","response length"+response.length());
                         JSONObject dataObj = response.getJSONObject(i);
+                        userId = dataObj.getInt("id");
+                        Log.d(TAG,"userid"+userId);
                         nickname = dataObj.getString("nickname");
                         city=dataObj.getString("city");
                         state=dataObj.getString("state");
@@ -208,8 +185,7 @@ public class MainActivity extends AppCompatActivity {
                                 Log.e("rew", "Address lookup Error", error);
                             }
                         }
-                        //if(mydb.getUsers("Select nickname from friends"))
-                        mydb.insertUser(nickname,null,city,state,country,latitude,longitude,year);
+                        mydb.insertUser(userId,nickname,null,city,state,country,latitude,longitude,year);
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -221,19 +197,23 @@ public class MainActivity extends AppCompatActivity {
                 Log.d("statefail", error.toString());
             }
         };
-        //for(int i=0;i<page;i++) {
-            url = "http://bismarck.sdsu.edu/hometown/users?reverse=true&afterid="+dbcount;
-            Log.d(TAG,"url" + url);
-            JsonArrayRequest getRequestState = new JsonArrayRequest(url, success_state, failure);
-            VolleyQueue.instance(this).add(getRequestState);
-        //}
+        Log.d("","servendcount"+servercount);
+        if(dbcount==0)
+            url = "http://bismarck.sdsu.edu/hometown/users?&page="+page+"&reverse=true";
+        else if(servercount>dbcount)
+            url = "http://bismarck.sdsu.edu/hometown/users?&afterid="+dbcount+"&beforeid="+servercount+"&page="+page+"&reverse=true";
+        else
+            url = "http://bismarck.sdsu.edu/hometown/users?&afterid="+dbcount+"&page="+page+"&reverse=true";
+        Log.d(TAG,"url " + url);
+        JsonArrayRequest getRequestState = new JsonArrayRequest(url, success_state, failure);
+        VolleyQueue.instance(this).add(getRequestState);
     }
 
-    public class GetDatabaseTask extends AsyncTask<SQLiteOpenHelper ,Void, Void> {
-        @Override
-        protected Void doInBackground(SQLiteOpenHelper... params) {
-            params[0].getWritableDatabase();
-            return null;
-        }
+    public int getServercount() {
+        return servercount;
+    }
+
+    public void setServercount(int servercount) {
+        this.servercount = servercount;
     }
 }
